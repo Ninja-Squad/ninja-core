@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+
+    <description>ninja-core tag library</description>
+    <display-name>ninja-core</display-name>
+    <tlib-version>1.1</tlib-version>
+    <short-name>ninja</short-name>
+    <uri>http://www.ninja-squad.com/jsp/ninja-core</uri>
+
+    <function>
+        <description>
+            Transforms newlines into HTML line breaks, and XML-escapes each line
+        </description>
+        <name>nlToBr</name>
+        <function-class>com.ninja_squad.core.jsp.JspFunctions</function-class>
+        <function-signature>java.lang.String nlToBr(java.lang.String)</function-signature>
+        <example>
+            ${ninja:nlToBr(form.messageBody)}
+        </example>
+    </function>
+
+    <function>
+        <description>
+            Escapes the characters that must be escaped in a JavaScript String literal (tab, newline, quote, etc.)
+        </description>
+        <name>escapeJs</name>
+        <function-class>com.ninja_squad.core.jsp.JspFunctions</function-class>
+        <function-signature>java.lang.String escapeJs(java.lang.String)</function-signature>
+        <example>
+            var text = '${ninja:escapeJs(form.message)}';
+        </example>
+    </function>
+
+    <function>
+        <description>
+            Upper-cases the first letter. Can be useful to display dates, for example
+        </description>
+        <name>upperFirst</name>
+        <function-class>com.ninja_squad.core.jsp.JspFunctions</function-class>
+        <function-signature>java.lang.String upperFirst(java.lang.String)</function-signature>
+        <example>
+            ${ninja:upperFirst(dateAsString)}
+        </example>
+    </function>
+</taglib>
