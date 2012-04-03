@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
+ * <p>
  * Tests are fragile when the tested unit depends on the current time, because the test
  * might pass at the time it was written, but fail some time later. To make sure that this doesn't
  * happen, methods should not use <code>System.currentTimeMillis()</code>, <code>new Date()</code>,
@@ -13,6 +14,11 @@ import java.util.Date;
  * time rather than starting from the current time.
  * <br/>
  * Such fake instances can be created (as well as the real clock) by the {@link Clocks} factory class.
+ * </p>
+ * <p>
+ * Note that if the superior joda-time API is used, the {@link JodaClock} interface and its {@link JodaClocks}
+ * factory should be used instead.
+ * </p>
  * @author JB
  */
 public interface Clock {

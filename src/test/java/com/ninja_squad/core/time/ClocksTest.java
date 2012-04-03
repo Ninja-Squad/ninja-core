@@ -57,12 +57,14 @@ public class ClocksTest {
     }
 
     public void testRunningClock(Clock clock, long timeReference) throws InterruptedException {
+        long t0 = System.currentTimeMillis();
         assertTrue(clock.nowInMillis() - timeReference < 50L);
         assertTrue(clock.nowAsDate().getTime() - timeReference < 50L);
-        assertTrue(clock.nowAsCalendar().getTimeInMillis() - timeReference < 20L);
+        assertTrue(clock.nowAsCalendar().getTimeInMillis() - timeReference < 50L);
         Thread.sleep(100L);
-        assertTrue(clock.nowInMillis() - (timeReference + 100L) < 50L);
-        assertTrue(clock.nowAsDate().getTime() - (timeReference + 100L) < 50L);
-        assertTrue(clock.nowAsCalendar().getTimeInMillis() - (timeReference + 100L) < 50L);
+        long t1 = System.currentTimeMillis();
+        assertTrue(clock.nowInMillis() - (timeReference + (t1 - t0)) < 50L);
+        assertTrue(clock.nowAsDate().getTime() - (timeReference + (t1 - t0)) < 50L);
+        assertTrue(clock.nowAsCalendar().getTimeInMillis() - (timeReference + (t1 - t0)) < 50L);
     }
 }
