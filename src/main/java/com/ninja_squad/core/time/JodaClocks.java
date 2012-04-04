@@ -10,7 +10,8 @@ import com.google.common.base.Preconditions;
 
 /**
  * Factory for JodaClock instances. <br/>
- * In production code, the injected (or default) JodaClock instance should be the one returned by {@link #realClock()}.<br/>
+ * In production code, the injected (or default) JodaClock instance should be the one returned by
+ * {@link #realClock()}.<br/>
  * In tests, the other factory methods allow returning clocks that return always the same time, or that return a time
  * starting at a different time from the actual current time.
  * @author JB
