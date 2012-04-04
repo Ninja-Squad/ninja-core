@@ -15,12 +15,12 @@ import com.ninja_squad.core.persistence.BaseQueryBuilder;
  * the Criteria API:
  * <ul>
  *   <li>it's not type-safe</li>
- *   <li>it doesn't make any validation regarding the correctness of the query (just as a static JPQL query)</li>
+ *   <li>it doesn't make any validation regarding the correctness of the query (just as a static HQL query)</li>
  * </ul>
  * It's useful though, because
  * <ul>
  *   <li>it's easier to use, read and maintain than the criteria API</li>
- *   <li>it has the full power of JPQL queries, and is not limited as the Criteria API can be for some queries</li>
+ *   <li>it has the full power of HQL queries, and is not limited as the Criteria API can be for some queries</li>
  * </ul>
  *
  * Example usage:
