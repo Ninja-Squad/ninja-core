@@ -1,19 +1,17 @@
-package com.ninja_squad.core.persistence.jpa;
+package com.ninja_squad.core.persistence.hibernate;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import javax.persistence.TypedQuery;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 import com.google.common.base.Preconditions;
 import com.ninja_squad.core.persistence.BaseQueryBuilder;
 
 /**
- * Allows creating a JPQL query dynamically. This class has the following drawbacks compared to
+ * Allows creating a HQL query dynamically. This class has the following drawbacks compared to
  * the Criteria API:
  * <ul>
  *   <li>it's not type-safe</li>
@@ -27,7 +25,7 @@ import com.ninja_squad.core.persistence.BaseQueryBuilder;
  *
  * Example usage:
  * <pre>
- *   JpqlQueryBuilder qb = JpqlQueryBuilder.start();
+ *   HqlQueryBuilder qb = HqlQueryBuilder.start();
  *   qb.select("cat.id")
  *     .select("cat.name")
  *     .from("Cat cat")
@@ -39,19 +37,22 @@ import com.ninja_squad.core.persistence.BaseQueryBuilder;
  *         .setParameter("firstName", firstName);
  *   }
  *   qb.orderBy("cat.name desc");
- *   Query query = qb.createQuery(entityManager);
+ *   Query query = qb.createQuery(session);
  * </pre>
+ *
+ * Note that, to be consistent with {@link com.ninja_squad.core.persistence.jpa.JpqlQueryBuilder} and because we
+ * think it's better to always have one, the select clause is mandatory.
  *
  * @author JB
  */
-public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
+public class HqlQueryBuilder extends BaseQueryBuilder<Query> {
 
     /**
      * Constructor
      * @param distinct indicates if the query is a <code>select...</code> or a
      * <code>select distinct...</code>
      */
-    JpqlQueryBuilder(boolean distinct) {
+    HqlQueryBuilder(boolean distinct) {
         super(distinct);
     }
 
@@ -59,16 +60,16 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * Creates a new instance of this class, for a <code>select...</code> query.
      * @return the created builder
      */
-    public static JpqlQueryBuilder start() {
-        return new JpqlQueryBuilder(false);
+    public static HqlQueryBuilder start() {
+        return new HqlQueryBuilder(false);
     }
 
     /**
      * Creates a new instance of this class, for a <code>select distinct...</code> query.
      * @return the created builder
      */
-    public static JpqlQueryBuilder startDistinct() {
-        return new JpqlQueryBuilder(true);
+    public static HqlQueryBuilder startDistinct() {
+        return new HqlQueryBuilder(true);
     }
 
     /**
@@ -76,7 +77,7 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * @param clause the clause element to add.
      * @return this
      */
-    public JpqlQueryBuilder select(@Nonnull String clause) {
+    public HqlQueryBuilder select(@Nonnull String clause) {
         addSelect(clause);
         return this;
     }
@@ -86,7 +87,7 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * @param clause the clause element to add.
      * @return this
      */
-    public JpqlQueryBuilder from(@Nonnull String clause) {
+    public HqlQueryBuilder from(@Nonnull String clause) {
         addFrom(clause);
         return this;
     }
@@ -97,7 +98,7 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * @param clause the clause element to add.
      * @return this
      */
-    public JpqlQueryBuilder where(@Nonnull String clause) {
+    public HqlQueryBuilder where(@Nonnull String clause) {
         addWhere(clause);
         return this;
     }
@@ -107,7 +108,7 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * @param clause the clause element to add.
      * @return this
      */
-    public JpqlQueryBuilder groupBy(@Nonnull String clause) {
+    public HqlQueryBuilder groupBy(@Nonnull String clause) {
         addGroupBy(clause);
         return this;
     }
@@ -119,7 +120,7 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * @param clause the clause element to add.
      * @return this
      */
-    public JpqlQueryBuilder having(@Nonnull String clause) {
+    public HqlQueryBuilder having(@Nonnull String clause) {
         addHaving(clause);
         return this;
     }
@@ -130,7 +131,7 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * @param clause the clause element to add.
      * @return this
      */
-    public JpqlQueryBuilder orderBy(@Nonnull String clause) {
+    public HqlQueryBuilder orderBy(@Nonnull String clause) {
         addOrderBy(clause);
         return this;
     }
@@ -142,59 +143,55 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * @param value the value of the parameter
      * @return this
      */
-    public JpqlQueryBuilder setParameter(@Nonnull String name, Object value) {
+    public HqlQueryBuilder setParameter(@Nonnull String name, Object value) {
         setParameterBinder(name, new SimpleParameterBinder(name, value));
         return this;
     }
 
     /**
-     * Sets a temporal parameter that will be bound when the query will be created. Note that
-     * the same parameter may be set several times. The last set value wins.
+     * Sets a parameter of type Date (as opposed to Timestamp and Time) that will be bound when the query will be
+     * created. Note that the same parameter may be set several times. The last set value wins.
      * @param name the name of the parameter (without the <code>:</code> prefix)
      * @param value the value of the parameter
-     * @param temporalType the type of the temporal parameter
      * @return this
      */
-    public JpqlQueryBuilder setParameter(@Nonnull String name, Date value, TemporalType temporalType) {
-        setParameterBinder(name, new DateParameterBinder(name, value, temporalType));
+    public HqlQueryBuilder setDateParameter(@Nonnull String name, Date value) {
+        setParameterBinder(name, new DateParameterBinder(name, value));
         return this;
     }
 
     /**
-     * Sets a temporal parameter that will be bound when the query will be created. Note that
-     * the same parameter may be set several times. The last set value wins.
+     * Sets a parameter of type Timestamp (as opposed to Date and Time) that will be bound when the query will be
+     * created. Note that the same parameter may be set several times. The last set value wins.
      * @param name the name of the parameter (without the <code>:</code> prefix)
      * @param value the value of the parameter
-     * @param temporalType the type of the temporal parameter
      * @return this
      */
-    public JpqlQueryBuilder setParameter(@Nonnull String name, Calendar value, TemporalType temporalType) {
-        setParameterBinder(name, new CalendarParameterBinder(name, value, temporalType));
+    public HqlQueryBuilder setTimestampParameter(@Nonnull String name, Date value) {
+        setParameterBinder(name, new TimestampParameterBinder(name, value));
         return this;
     }
 
     /**
-     * Creates a typed query, and binds the parameters that have been set to this builder.
-     * @param entityManager the entity manager used to create the query
-     * @param resultType the type of the result of the query
-     * @return the typed query created
+     * Sets a parameter of type Time (as opposed to Date and Timestamp) that will be bound when the query will be
+     * created. Note that the same parameter may be set several times. The last set value wins.
+     * @param name the name of the parameter (without the <code>:</code> prefix)
+     * @param value the value of the parameter
+     * @return this
      */
-    public <T> TypedQuery<T> createQuery(@Nonnull EntityManager entityManager, @Nonnull Class<T> resultType) {
-        Preconditions.checkNotNull(entityManager, "entityManager may not be null");
-        Preconditions.checkNotNull(resultType, "resultType may not be null");
-        TypedQuery<T> query = entityManager.createQuery(createJpql(), resultType);
-        bindParameters(query);
-        return query;
+    public HqlQueryBuilder setTimeParameter(@Nonnull String name, Date value) {
+        setParameterBinder(name, new TimeParameterBinder(name, value));
+        return this;
     }
 
     /**
      * Creates a query, and binds the parameters that have been set to this builder.
-     * @param entityManager the entity manager used to create the query
+     * @param session the session used to create the query
      * @return the query created
      */
-    public Query createQuery(@Nonnull EntityManager entityManager) {
-        Preconditions.checkNotNull(entityManager, "entityManager may not be null");
-        Query query = entityManager.createQuery(createJpql());
+    public Query createQuery(@Nonnull Session session) {
+        Preconditions.checkNotNull(session, "session may not be null");
+        Query query = session.createQuery(createHql());
         bindParameters(query);
         return query;
     }
@@ -207,14 +204,14 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      *                                  .from("Bar bar")
      *                                  .where("bar.name = :barName")
      *                                  .setParameter("barName", barName)
-     *                                  .toJpql()
+     *                                  .toHql()
      *            + ")");
      * </pre>
      *
      * The subquery does a <code>select...</code>
      */
-    public JpqlSubQueryBuilder subQueryBuilder() {
-        return new JpqlSubQueryBuilder(this, false);
+    public HqlSubQueryBuilder subQueryBuilder() {
+        return new HqlSubQueryBuilder(this, false);
     }
 
     /**
@@ -222,11 +219,11 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
      * The subquery does a <code>select distinct...</code>. Otherwise, its usage is similar to the one
      * of {@link #subQueryBuilder()}.
      */
-    public JpqlSubQueryBuilder distinctSubQueryBuilder() {
-        return new JpqlSubQueryBuilder(this, true);
+    public HqlSubQueryBuilder distinctSubQueryBuilder() {
+        return new HqlSubQueryBuilder(this, true);
     }
 
-    final String createJpql() {
+    final String createHql() {
         return createQueryString();
     }
 
@@ -256,38 +253,53 @@ public class JpqlQueryBuilder extends BaseQueryBuilder<Query> {
     private static final class DateParameterBinder implements ParameterBinder<Query> {
         private final String name;
         private final Date value;
-        private final TemporalType temporalType;
 
-        public DateParameterBinder(String name, Date value, TemporalType temporalType) {
+        public DateParameterBinder(String name, Date value) {
             this.name = name;
             this.value = (Date) value.clone();
-            this.temporalType = temporalType;
         }
 
         @Override
         public void bind(Query query) {
-            query.setParameter(name, value, temporalType);
+            query.setDate(name, value);
         }
     }
 
     /**
-     * ParameterBinder implementation for calendar parameters
+     * ParameterBinder implementation for timestamp parameters
      * @author JB
      */
-    private static final class CalendarParameterBinder implements ParameterBinder<Query> {
+    private static final class TimestampParameterBinder implements ParameterBinder<Query> {
         private final String name;
-        private final Calendar value;
-        private final TemporalType temporalType;
+        private final Date value;
 
-        public CalendarParameterBinder(String name, Calendar value, TemporalType temporalType) {
+        public TimestampParameterBinder(String name, Date value) {
             this.name = name;
-            this.value = (Calendar) value.clone();
-            this.temporalType = temporalType;
+            this.value = (Date) value.clone();
         }
 
         @Override
         public void bind(Query query) {
-            query.setParameter(name, value, temporalType);
+            query.setTimestamp(name, value);
+        }
+    }
+
+    /**
+     * ParameterBinder implementation for date parameters
+     * @author JB
+     */
+    private static final class TimeParameterBinder implements ParameterBinder<Query> {
+        private final String name;
+        private final Date value;
+
+        public TimeParameterBinder(String name, Date value) {
+            this.name = name;
+            this.value = (Date) value.clone();
+        }
+
+        @Override
+        public void bind(Query query) {
+            query.setTime(name, value);
         }
     }
 }
