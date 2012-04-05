@@ -97,3 +97,7 @@ cleanEclipseJdt << {
     File f = file('.settings/org.eclipse.core.resources.prefs')
     f.delete()
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.0-milestone-9'
+}
