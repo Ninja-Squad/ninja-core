@@ -9,6 +9,7 @@ import org.hibernate.Session;
 
 import com.google.common.base.Preconditions;
 import com.ninja_squad.core.persistence.BaseQueryBuilder;
+import com.ninja_squad.core.persistence.jpa.JpqlQueryBuilder;
 
 /**
  * Allows creating a HQL query dynamically. This class has the following drawbacks compared to
@@ -40,7 +41,7 @@ import com.ninja_squad.core.persistence.BaseQueryBuilder;
  *   Query query = qb.createQuery(session);
  * </pre>
  *
- * Note that, to be consistent with {@link com.ninja_squad.core.persistence.jpa.JpqlQueryBuilder} and because we
+ * Note that, to be consistent with {@link JpqlQueryBuilder} and because we
  * think it's better to always have one, the select clause is mandatory.
  *
  * @author JB

@@ -18,44 +18,8 @@ import com.ninja_squad.core.exception.ShouldNeverHappenException;
  */
 public final class JspFunctions {
 
-    private static final Function<String, String> ESCAPE_XML = new Function<String, String>() {
-        @Override
-        public String apply(String input) {
-            if (input == null) {
-                return "";
-            }
-            StringBuilder out = new StringBuilder(input.length() + 20);
-            for (int i = 0; i < input.length(); i++) {
-                char c = input.charAt(i);
-                if (c <= '>') { // optimization
-                    switch (c) {
-                        case '<' :
-                            out.append("&lt;");
-                            break;
-                        case '>' :
-                            out.append("&gt;");
-                            break;
-                        case '&' :
-                            out.append("&amp;");
-                            break;
-                        case '"' :
-                            out.append("&#034;");
-                            break;
-                        case '\'' :
-                            out.append("&#039;");
-                            break;
-                        default :
-                            out.append(c);
-                            break;
-                    }
-                }
-                else {
-                    out.append(c);
-                }
-            }
-            return out.toString();
-        }
-    };
+    private static final int ESTIMATED_ADDITIONAL_CHARS = 20;
+    private static final Function<String, String> ESCAPE_XML = new EscapeXmlFunction();
 
     private JspFunctions() {
     }
@@ -94,7 +58,7 @@ public final class JspFunctions {
             return "";
         }
 
-        StringBuilder out = new StringBuilder(input.length() + 20);
+        StringBuilder out = new StringBuilder(input.length() + ESTIMATED_ADDITIONAL_CHARS);
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             switch (c) {
@@ -142,5 +106,48 @@ public final class JspFunctions {
             return "";
         }
         return Character.toUpperCase(input.charAt(0)) + input.substring(1);
+    }
+
+    /**
+     * The function used to escape XML special chars
+     * @author JB
+     */
+    private static final class EscapeXmlFunction implements Function<String, String> {
+        @Override
+        public String apply(String input) {
+            if (input == null) {
+                return "";
+            }
+            StringBuilder out = new StringBuilder(input.length() + ESTIMATED_ADDITIONAL_CHARS);
+            for (int i = 0; i < input.length(); i++) {
+                char c = input.charAt(i);
+                if (c <= '>') { // optimization
+                    switch (c) {
+                        case '<' :
+                            out.append("&lt;");
+                            break;
+                        case '>' :
+                            out.append("&gt;");
+                            break;
+                        case '&' :
+                            out.append("&amp;");
+                            break;
+                        case '"' :
+                            out.append("&#034;");
+                            break;
+                        case '\'' :
+                            out.append("&#039;");
+                            break;
+                        default :
+                            out.append(c);
+                            break;
+                    }
+                }
+                else {
+                    out.append(c);
+                }
+            }
+            return out.toString();
+        }
     }
 }
