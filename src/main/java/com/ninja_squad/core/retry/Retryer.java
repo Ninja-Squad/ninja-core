@@ -60,6 +60,7 @@ public final class Retryer<V> {
      * to abort, or the thread was interrupted. Note that if the thread is interrupted,
      * this exception is thrown and the thread's interrupt status is set.
      */
+    @SuppressWarnings("PMD.AvoidCatchingThrowable")
     public V call(Callable<V> callable) throws ExecutionException, RetryException {
         long startTime = System.currentTimeMillis();
         for (int attemptNumber = 1;; attemptNumber++) {

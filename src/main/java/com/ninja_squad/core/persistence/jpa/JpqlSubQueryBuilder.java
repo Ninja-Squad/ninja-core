@@ -3,6 +3,7 @@ package com.ninja_squad.core.persistence.jpa;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
@@ -28,7 +29,7 @@ public class JpqlSubQueryBuilder extends JpqlQueryBuilder {
      * {@inheritDoc}
      */
     @Override
-    public JpqlQueryBuilder setParameter(String name, Object value) {
+    public JpqlQueryBuilder setParameter(@Nonnull String name, Object value) {
         parent.setParameter(name, value);
         return this;
     }
@@ -40,7 +41,7 @@ public class JpqlSubQueryBuilder extends JpqlQueryBuilder {
      * {@inheritDoc}
      */
     @Override
-    public JpqlQueryBuilder setParameter(String name, Date value, TemporalType temporalType) {
+    public JpqlQueryBuilder setParameter(@Nonnull String name, Date value, TemporalType temporalType) {
         parent.setParameter(name, value, temporalType);
         return this;
     }
@@ -52,7 +53,7 @@ public class JpqlSubQueryBuilder extends JpqlQueryBuilder {
      * {@inheritDoc}
      */
     @Override
-    public JpqlQueryBuilder setParameter(String name, Calendar value, TemporalType temporalType) {
+    public JpqlQueryBuilder setParameter(@Nonnull String name, Calendar value, TemporalType temporalType) {
         parent.setParameter(name, value, temporalType);
         return this;
     }
@@ -65,7 +66,7 @@ public class JpqlSubQueryBuilder extends JpqlQueryBuilder {
      * {@inheritDoc}
      */
     @Override
-    public <T> TypedQuery<T> createQuery(EntityManager entityManager, Class<T> resultType) {
+    public <T> TypedQuery<T> createQuery(@Nonnull EntityManager entityManager, @Nonnull Class<T> resultType) {
         return parent.createQuery(entityManager, resultType);
     }
 
@@ -77,7 +78,7 @@ public class JpqlSubQueryBuilder extends JpqlQueryBuilder {
      * {@inheritDoc}
      */
     @Override
-    public Query createQuery(EntityManager entityManager) {
+    public Query createQuery(@Nonnull EntityManager entityManager) {
         return parent.createQuery(entityManager);
     }
 
