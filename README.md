@@ -1,3 +1,3 @@
 # How to...
 ## build
-    gradle build
+    gradlew build
