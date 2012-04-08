@@ -3,5 +3,8 @@
 /.settings
 /.classpath
 /.project
+/.idea
+/*.iml
 /bin
 /build
+.DS_Store
