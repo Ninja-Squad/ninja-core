@@ -32,7 +32,7 @@ gradle.taskGraph.whenReady {taskGraph ->
         test.doFirst { task ->
             systemProperties 'net.sourceforge.cobertura.datafile': "${project.buildDir}/cobertura.ser"
             // delete data file for cobertura, otherwise coverage would be added
-            ant.delete(file: "${project.buildDir}/*.ser", failonerror:false)
+            ant.delete(file: "${project.buildDir}/*.ser", failonerror: false)
             // delete copy of original classes
             ant.delete(dir: "${project.buildDir}/classes/main-instrumented", failonerror: false)
                
@@ -46,9 +46,11 @@ gradle.taskGraph.whenReady {taskGraph ->
                 fileset(dir: "${project.buildDir}/classes/main-instrumented",
                         includes: "**/*.class")
             }
-            // make sure that cobertura is in the test class path
-            task.classpath = task.classpath.minus(files(sourceSets.main.output.classesDir)).plus(configurations.cobertura).plus(files("${project.buildDir}/classes/main-instrumented"))
         }
+        // make sure that cobertura is in the test class path
+        test.classpath = test.classpath.minus(files(sourceSets.main.output.classesDir)).plus(configurations.cobertura).plus(files("${project.buildDir}/classes/main-instrumented"))
+        test.outputs.dir "${project.buildDir}/classes/main-instrumented"
+        test.outputs.files "${project.buildDir}/cobertura.ser"
     }
 }
 

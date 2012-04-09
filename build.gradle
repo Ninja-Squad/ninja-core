@@ -4,8 +4,9 @@ apply plugin: 'checkstyle'
 apply plugin: 'pmd'
 apply plugin: 'findbugs'
 apply from: 'cobertura.gradle'
+apply plugin: 'maven'
 
-group = 'ninja-squad'
+group = 'com.ninja-squad'
 sourceCompatibility = 1.6
 
 repositories {
@@ -110,6 +111,22 @@ eclipseJdt << {
 cleanEclipseJdt << {
     File f = file('.settings/org.eclipse.core.resources.prefs')
     f.delete()
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            // TODO configure maven repos:
+            // repository(url: uri("pomRepo"))
+            // snapshotRepository(url: uri("snapshotRepo"))
+        }
+    }
+}
+
+[install.repositories.mavenInstaller, uploadArchives.repositories.mavenDeployer]*.pom*.whenConfigured {pom ->
+    pom.dependencies = pom.dependencies.findAll {it.scope != 'test'} // we don't care about test dependencies
+    pom.dependencies.findAll {dep -> dep.artifactId != 'guava'}*.optional = true // all compile dependencies are optional except guava
+    pom.dependencies*.scope = null // all dependencies are compile time dependencies, and there is no need to say it
 }
 
 task wrapper(type: Wrapper) {
