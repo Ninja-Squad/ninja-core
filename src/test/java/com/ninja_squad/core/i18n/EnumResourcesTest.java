@@ -29,15 +29,25 @@ public class EnumResourcesTest {
     public void getStringWorksWithTopLevelEnum() {
         assertEquals("The default foo label", EnumResources.getInstance().withLocale(Locale.ENGLISH).getString(TestEnum.FOO));
         assertEquals("The default foo label", EnumResources.getInstance().getString(TestEnum.FOO));
-        assertEquals("The default foo description", EnumResources.getInstance().getString(TestEnum.FOO, "description"));
-        assertEquals("The default foo description", EnumResources.getInstance().getString(TestEnum.FOO, ".description"));
+        assertEquals("The default foo description",
+                     EnumResources.getInstance().withSuffix("description").getString(TestEnum.FOO));
+        assertEquals("The default foo description",
+                     EnumResources.getInstance().withSuffix(".description").getString(TestEnum.FOO));
     }
 
     @Test
     public void getStringWorksWithInnerEnum() {
-        assertEquals("The default inner foo label", EnumResources.getInstance().getString(InnerTestEnum.INNER_FOO));
-        assertEquals("The default inner foo description", EnumResources.getInstance().getString(InnerTestEnum.INNER_FOO, "description"));
-        assertEquals("The default inner foo description", EnumResources.getInstance().getString(InnerTestEnum.INNER_FOO, ".description"));
+        assertEquals("The default inner foo label",
+                     EnumResources.getInstance().getString(InnerTestEnum.INNER_FOO));
+        assertEquals("The default inner foo description",
+                     EnumResources.getInstance().withSuffix("description").getString(InnerTestEnum.INNER_FOO));
+        assertEquals("The default inner foo description",
+                     EnumResources.getInstance().withSuffix(".description").getString(InnerTestEnum.INNER_FOO));
+    }
+
+    @Test
+    public void getStringReturnsEmptyStringWhenEnumConstantIsNull() {
+        assertEquals("", EnumResources.getInstance().<TestEnum>getString(null));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -46,18 +56,8 @@ public class EnumResourcesTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void getStringWithSuffixThrowsExceptionWhenNoBundle() {
-        EnumResources.getInstance().getString(InnerTestEnum2.INNER_FOO, "description");
-    }
-
-    @Test(expected = IllegalStateException.class)
     public void getStringThrowsExceptionWhenNoKey() {
         EnumResources.getInstance().getString(TestEnum.BAR);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void getStringWithSuffixThrowsExceptionWhenNoKey() {
-        EnumResources.getInstance().getString(TestEnum.BAR, "description");
     }
 
     @Test
