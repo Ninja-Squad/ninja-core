@@ -10,6 +10,47 @@
     <short-name>ninja</short-name>
     <uri>http://www.ninja-squad.com/jsp/ninja-core</uri>
 
+    <tag>
+        <description>
+            Gets an internationalized label from an enum constant using com.ninja_squad.core.i18n.EnumResources and 
+            writes it (unescaped) to the page writer.
+            The locale is, by default, found where the JSTL setLocale tag stores it. If not found there, it's 
+            found in the request. To change the way the locale is resolved, use the 
+            com.ninja_squad.core.jsp.Config.setLocaleResolver() method.
+        </description>
+        <name>enumResource</name>
+        <tag-class>com.ninja_squad.core.jsp.EnumResourceTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <description>the enum for which an internationalized label must be found</description>
+            <name>enum</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.Enum</type>
+        </attribute>
+        <attribute>
+            <description>the suffix to use to get the internationalized label</description>
+            <name>suffix</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>The name of the attribute to set with the label instead of writing it to the JSP writer</description>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <description>The scope of the attribute to set with the label instead of writing it to the JSP writer</description>
+            <name>scope</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <type>java.lang.String</type>
+        </attribute>
+    </tag>
+    
     <function>
         <description>
             Transforms newlines into HTML line breaks, and XML-escapes each line
