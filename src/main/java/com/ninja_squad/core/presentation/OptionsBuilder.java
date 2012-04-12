@@ -16,8 +16,21 @@ import com.google.common.collect.Ordering;
 import com.ninja_squad.core.i18n.EnumResources;
 
 /**
- * A builder to construct a list of options. It allows transforming a collection of objects, values, or enums into
- * a list of options, to prepend them with a custom
+ * <p>
+ * A builder to construct a list of options. It allows transforming a collection of options, values, or enums into
+ * a list of options, to prepend them with a custom null option, and to order them by value or label.
+ * </p>
+ * <p>Example usages:</p>
+ * <pre>
+ *     List&lt;Integer&gt; integers = Arrays.asList(1, 2, 3);
+ *     List&lt;Option&lt;Integer&gt;&gt; options = OptionsBuilder.forValues(integers, Functions.toStringFunction())
+ *                                                   .withNullOption(Option&lt;Integer&gt;nullSpaceOption())
+ *                                                   .orderByValue(Ordering.&lt;Integer&gt;natural().reverse())
+ *                                                   .toList();
+ *     List&lt;Option&lt;Season&gt;&gt; seasons = OptionsBuilder.forEnumClass(Season.class)
+ *                                                  .orderByLabel()
+ *                                                  .toList();
+ * </pre>
  * @author JB
  *
  * @param <V> the type of options created by this builder
@@ -76,15 +89,7 @@ public final class OptionsBuilder<V> {
                                                   @Nonnull final Function<? super V, String> valueToLabel) {
         Preconditions.checkNotNull(values, "values may not be null");
         Preconditions.checkNotNull(valueToLabel, "valueToLabel may not be null");
-        return forOptions(Iterables.transform(values, new Function<V, Option<V>>() {
-            @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-                value = "NP",
-                justification = "if null, it'll throw a NPE as documented")
-            @Override
-            public Option<V> apply(V input) {
-                return Option.newOption(input, valueToLabel.apply(input));
-            }
-        }));
+        return forOptions(Iterables.transform(values, Option.<V>valueToOptionFunction(valueToLabel)));
     }
 
     /**
@@ -96,6 +101,8 @@ public final class OptionsBuilder<V> {
      */
     public static <V extends Enum<V>> OptionsBuilder<V> forEnumClass(@Nonnull Class<V> enumClass,
                                                                      @Nonnull EnumResources enumResources) {
+        Preconditions.checkNotNull(enumClass, "enumClass may not be null");
+        Preconditions.checkNotNull(enumResources, "enumResources may not be null");
         return forEnums(EnumSet.allOf(enumClass), enumResources);
     }
 
@@ -108,15 +115,9 @@ public final class OptionsBuilder<V> {
      */
     public static <V extends Enum<V>> OptionsBuilder<V> forEnums(@Nonnull Iterable<V> enumConstants,
                                                                  @Nonnull final EnumResources enumResources) {
-        return forValues(enumConstants, new Function<V, String>() {
-            @Override
-            @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-                value = "NP",
-                justification = "if null, it'll throw a NPE as documented")
-            public String apply(V input) {
-                return enumResources.getString(input);
-            }
-        });
+        Preconditions.checkNotNull(enumConstants, "enumConstants may not be null");
+        Preconditions.checkNotNull(enumResources, "enumResources may not be null");
+        return forOptions(Iterables.transform(enumConstants, Option.<V>enumToOptionFunction(enumResources)));
     }
 
     /**
