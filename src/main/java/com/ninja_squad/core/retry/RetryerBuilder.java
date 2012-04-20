@@ -136,16 +136,16 @@ public final class RetryerBuilder<V> {
      */
     private static final class ExceptionClassPredicate<V> implements Predicate<Attempt<V>> {
 
-        private Class<? extends Throwable> exceptionClass;
+        private final Class<? extends Throwable> exceptionClass;
 
-        public ExceptionClassPredicate(Class<? extends Throwable> exceptionClass) {
-            this.exceptionClass = exceptionClass;
+        public ExceptionClassPredicate(@Nonnull Class<? extends Throwable> exceptionClass) {
+            this.exceptionClass = Preconditions.checkNotNull(exceptionClass);
         }
 
-        @Override
         @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-            value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+            value = "NP",
             justification = "This predicate is never called with a null argument")
+        @Override
         public boolean apply(Attempt<V> attempt) {
             if (!attempt.hasException()) {
                 return false;
@@ -163,16 +163,16 @@ public final class RetryerBuilder<V> {
      */
     private static final class ResultPredicate<V> implements Predicate<Attempt<V>> {
 
-        private Predicate<V> delegate;
+        private final Predicate<V> delegate;
 
-        public ResultPredicate(Predicate<V> delegate) {
-            this.delegate = delegate;
+        public ResultPredicate(@Nonnull Predicate<V> delegate) {
+            this.delegate = Preconditions.checkNotNull(delegate);
         }
 
-        @Override
         @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-            value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+            value = "NP",
             justification = "This predicate is never called with a null argument")
+        @Override
         public boolean apply(Attempt<V> attempt) {
             if (!attempt.hasResult()) {
                 return false;
@@ -191,15 +191,15 @@ public final class RetryerBuilder<V> {
      */
     private static final class ExceptionPredicate<V> implements Predicate<Attempt<V>> {
 
-        private Predicate<Throwable> delegate;
+        private final Predicate<Throwable> delegate;
 
-        public ExceptionPredicate(Predicate<Throwable> delegate) {
-            this.delegate = delegate;
+        public ExceptionPredicate(@Nonnull Predicate<Throwable> delegate) {
+            this.delegate = Preconditions.checkNotNull(delegate);
         }
 
         @Override
         @edu.umd.cs.findbugs.annotations.SuppressWarnings(
-            value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE",
+            value = "NP",
             justification = "This predicate is never called with a null argument")
         public boolean apply(Attempt<V> attempt) {
             if (!attempt.hasException()) {

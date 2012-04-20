@@ -13,7 +13,7 @@ import com.ninja_squad.core.i18n.EnumResources;
  * <p>An option, that can be chosen in a select/combo box. An option has a value and a label. The value can be of
  * any type, and the label, which is typically internationalized, is what is displayed to the end user.
  * </p>
- * <p>Two options are eaqual if their values are equal. A special "null option" is often displayed at the beginning
+ * <p>Two options are equal if their values are equal. A special "null option" is often displayed at the beginning
  * of the list of options, to force the user to make a choice. Such a "null option" has a null value, and a
  * customizable label. Such null options are constructed using one of the <code>nullOption()</code> factory methods.
  * Two null options are always equal to each other, regardless of their label.</p>
@@ -58,7 +58,8 @@ public final class Option<V> implements Serializable {
      * @param valueToLabel the function  which is used to get the label corresponding to the value
      * @return the created option
      */
-    public static <V> Option<V> forValue(@Nonnull V value, @Nonnull final Function<? super V, String> valueToLabel) {
+    public static <V> Option<V> forValue(@Nonnull V value,
+                                         @Nonnull final Function<? super V, String> valueToLabel) {
         Preconditions.checkNotNull(value, "value may not be null");
         Preconditions.checkNotNull(valueToLabel, "label may not be null");
         return Option.<V>valueToOptionFunction(valueToLabel).apply(value);
@@ -71,7 +72,7 @@ public final class Option<V> implements Serializable {
      * @return the created option
      */
     public static <V extends Enum<V>> Option<V> forEnum(@Nonnull V enumConstant,
-                                                                @Nonnull final EnumResources enumResources) {
+                                                        @Nonnull final EnumResources enumResources) {
         Preconditions.checkNotNull(enumConstant, "enumConstant may not be null");
         Preconditions.checkNotNull(enumResources, "enumResources may not be null");
         return Option.<V>enumToOptionFunction(enumResources).apply(enumConstant);
@@ -161,7 +162,7 @@ public final class Option<V> implements Serializable {
         return label;
     }
 
-    static <V> Function<V, Option<V>> valueToOptionFunction(final Function<? super V, String> valueToLabel) {
+    static <V> Function<V, Option<V>> valueToOptionFunction(@Nonnull final Function<? super V, String> valueToLabel) {
         return new Function<V, Option<V>>() {
             @edu.umd.cs.findbugs.annotations.SuppressWarnings(
                 value = "NP",
@@ -174,7 +175,7 @@ public final class Option<V> implements Serializable {
         };
     }
 
-    static <V extends Enum<V>> Function<V, Option<V>> enumToOptionFunction(final EnumResources enumResources) {
+    static <V extends Enum<V>> Function<V, Option<V>> enumToOptionFunction(@Nonnull final EnumResources enumResources) {
         return new Function<V, Option<V>>() {
             @Override
             @edu.umd.cs.findbugs.annotations.SuppressWarnings(
