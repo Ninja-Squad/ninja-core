@@ -29,7 +29,7 @@ public final class Optionals {
      * containing potentially <code>null</code> values, and immutable collections that don't support null values.
      * For example, transforming an Iterable containing nulls into an ImmutableList is done by:
      * <code>
-     *     ImmutableList.copyOf(Iterables.transform(stringCollection, Optionals.<String>toOptional()));
+     *     ImmutableList.copyOf(Iterables.transform(stringCollection, Optionals.&lt;String&gt;toOptional()));
      * </code>
      * @return the function.
      */
