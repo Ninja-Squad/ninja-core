@@ -2,6 +2,7 @@ package com.ninja_squad.core.i18n;
 
 import static org.junit.Assert.*;
 
+import java.util.Comparator;
 import java.util.Locale;
 
 import org.junit.Test;
@@ -73,5 +74,14 @@ public class EnumResourcesTest {
     @Test
     public void getStringReturnsKeyWithQuestionMarksWithJstlStrategy() {
         assertEquals("???BAR???", EnumResources.getInstance().withMissingResourceStrategy(MissingResourceStrategies.JSTL).getString(TestEnum.BAR));
+    }
+
+    @Test
+    public void comparatorWorks() {
+        Comparator<TestEnum> comparator = EnumResources.getInstance()
+                                                       .withSuffix("forComparator")
+                                                       .comparator();
+        assertTrue(comparator.compare(TestEnum.FOO, TestEnum.BAR) < 0); // "Hello" < "World"
+        assertEquals(0, comparator.compare(TestEnum.FOO, TestEnum.FOO));
     }
 }

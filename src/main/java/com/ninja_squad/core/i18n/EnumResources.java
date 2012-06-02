@@ -1,5 +1,6 @@
 package com.ninja_squad.core.i18n;
 
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -105,6 +106,23 @@ public final class EnumResources {
         catch (MissingResourceException e) {
             return missingResourceStrategy.handleMissingResource(key, e);
         }
+    }
+
+    /**
+     * Returns a comparator that compares enum values using their corresponding string, returned by
+     * {@link #getString(Enum)}. Note that if one of the enum values compared by the created comparator doesn't
+     * have an associated string, and the {@link MissingResourceStrategy} associated with this EnumResources
+     * instance throws an exception or returns <code>null</code>, the comparator will itself throw the exception
+     * or a NullPointerException.
+     * @return the created comparator
+     */
+    public <E extends Enum<E>> Comparator<E> comparator() {
+        return new Comparator<E>() {
+            @Override
+            public int compare(E o1, E o2) {
+                return getString(o1).compareTo(getString(o2));
+            }
+        };
     }
 
     /**
