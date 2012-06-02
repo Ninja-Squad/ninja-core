@@ -14,6 +14,14 @@ public class ResultSetsTest {
     }
 
     @Test
+    public void enhanceShouldNotEnhanceTwice() {
+        ResultSet mockResultSet = mock(ResultSet.class);
+        EnhancedResultSet enhanced1 = ResultSets.enhance(mockResultSet);
+        EnhancedResultSet enhanced2 = ResultSets.enhance(enhanced1);
+        assertSame(enhanced1, enhanced2);
+    }
+
+    @Test
     public void getNullableIntWithColumnIndexWorks() throws SQLException {
         ResultSet mockResultSet = mock(ResultSet.class);
         when(mockResultSet.getInt(2)).thenReturn(7);

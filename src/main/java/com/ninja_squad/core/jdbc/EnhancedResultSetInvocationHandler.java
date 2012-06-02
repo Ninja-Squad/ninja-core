@@ -198,7 +198,7 @@ class EnhancedResultSetInvocationHandler implements InvocationHandler {
     }
 
     /**
-     * The interface of the invokers that call the static ResultSets methods.
+     * The interface of the invokers that call the static {@link ResultSets} methods.
      * @author JB
      */
     private interface Invoker {

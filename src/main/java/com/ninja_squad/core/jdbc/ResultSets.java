@@ -19,14 +19,18 @@ public final class ResultSets {
     }
 
     /**
-     * Returns an instance of {@link EnhancedResultSet} which is a proxy to the given ResultSet.
+     * Returns an instance of {@link EnhancedResultSet} which is a proxy to the given ResultSet. Note that if the
+     * given result set is already enhanced, it's not enhanced a second time, but returned directly.
      * @param resultSet the ResultSet to proxy
-     * @return a proxy to the ResultSet, which offeresultSet the additional methods dealing with nullable
+     * @return a proxy to the ResultSet, which offers the additional methods dealing with nullable
      * values. This proxy calls the static methods in this class to implement these additional
      * methods.
      */
     public static EnhancedResultSet enhance(@Nonnull ResultSet resultSet) {
         Preconditions.checkNotNull(resultSet, "resultSet may not be null");
+        if (resultSet instanceof EnhancedResultSet) {
+            return (EnhancedResultSet) resultSet;
+        }
         return (EnhancedResultSet) Proxy.newProxyInstance(resultSet.getClass().getClassLoader(),
                                                           new Class<?>[] {EnhancedResultSet.class},
                                                           new EnhancedResultSetInvocationHandler(resultSet));
