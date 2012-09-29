@@ -61,6 +61,20 @@ public class HqlQueryBuilderTest {
     }
 
     @Test
+    public void subQueryHqlIsGeneratedCorrectly() {
+        HqlSubQueryBuilder sb = builder.subQueryBuilder();
+        sb.select("toy.id")
+          .from("Toy toy")
+          .where("toy.kind = 'mouse'");
+        String expected = "select toy.id"
+                          + " from Toy toy"
+                          + " where toy.kind = 'mouse'";
+
+        assertEquals(expected, sb.toHql());
+        assertEquals(" (" + expected + ") ", sb.toWrappedHql());
+    }
+
+    @Test
     public void parametersAreBoundCorrectly() {
         Query mockQuery = mock(Query.class);
         Session mockSession = mock(Session.class);

@@ -61,6 +61,20 @@ public class JpqlQueryBuilderTest {
     }
 
     @Test
+    public void subQueryJpqlIsGeneratedCorrectly() {
+        JpqlSubQueryBuilder sb = builder.subQueryBuilder();
+        sb.select("toy.id")
+          .from("Toy toy")
+          .where("toy.kind = 'mouse'");
+        String expected = "select toy.id"
+                          + " from Toy toy"
+                          + " where toy.kind = 'mouse'";
+
+        assertEquals(expected, sb.toJpql());
+        assertEquals(" (" + expected + ") ", sb.toWrappedJpql());
+    }
+
+    @Test
     public void parametersAreBoundCorrectly() {
         Query mockQuery = mock(Query.class);
         EntityManager mockEm = mock(EntityManager.class);
@@ -143,7 +157,7 @@ public class JpqlQueryBuilderTest {
           .setParameter("startDate", startDate, TemporalType.DATE)
           .setParameter("endDate", endDate, TemporalType.TIMESTAMP);
 
-        qb.where("foo.id in (" + sb.toJpql() + ")");
+        qb.where("foo.id in" + sb.toWrappedJpql());
 
         Query mockQuery = mock(Query.class);
         EntityManager mockEm = mock(EntityManager.class);
@@ -174,7 +188,7 @@ public class JpqlQueryBuilderTest {
           .setParameter("startDate", startDate, TemporalType.DATE)
           .setParameter("endDate", endDate, TemporalType.TIMESTAMP);
 
-        qb.where("foo.id in (" + sb.toJpql() + ")");
+        qb.where("foo.id in" + sb.toWrappedJpql());
 
         TypedQuery<Object[]> mockQuery = mock(TypedQuery.class);
         EntityManager mockEm = mock(EntityManager.class);

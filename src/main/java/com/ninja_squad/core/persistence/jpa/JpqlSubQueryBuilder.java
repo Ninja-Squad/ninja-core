@@ -90,4 +90,14 @@ public class JpqlSubQueryBuilder extends JpqlQueryBuilder {
     public String toJpql() {
         return createJpql();
     }
+
+    /**
+     * Transforms the sub query into a JPQL clause, wrapped in parentheses, that can be added as a from or where
+     * clause to its parent builder.
+     * @return the JPQL clause of this sub query builder, wrapped in parentheses.
+     */
+    public String toWrappedJpql() {
+        // spaces around are wanted, to allows for "where foo.bar in" + subQueryBuilder.toWrappedJpql()
+        return " (" + createJpql() + ") ";
+    }
 }

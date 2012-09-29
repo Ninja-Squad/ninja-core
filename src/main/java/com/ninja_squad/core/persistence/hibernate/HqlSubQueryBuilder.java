@@ -81,11 +81,21 @@ public class HqlSubQueryBuilder extends HqlQueryBuilder {
     }
 
     /**
-     * Transforms the sub query into a JPQL clause, that can be added as a from or where clause to its parent
+     * Transforms the sub query into a HQL clause, that can be added as a from or where clause to its parent
      * builder.
-     * @return the JPQL clause of this sub query builder.
+     * @return the HQL clause of this sub query builder.
      */
     public String toHql() {
         return createHql();
+    }
+
+    /**
+     * Transforms the sub query into a JPQL clause, wrapped in parentheses, that can be added as a from or where
+     * clause to its parent builder.
+     * @return the JPQL clause of this sub query builder, wrapped in parentheses.
+     */
+    public String toWrappedHql() {
+        // spaces around are wanted, to allows for "where foo.bar in" + subQueryBuilder.toWrappedHql()
+        return " (" + createHql() + ") ";
     }
 }

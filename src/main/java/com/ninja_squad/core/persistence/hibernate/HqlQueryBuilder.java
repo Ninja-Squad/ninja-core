@@ -200,13 +200,12 @@ public class HqlQueryBuilder extends BaseQueryBuilder<Query> {
     /**
      * Allows creating a subquery that can be added as a from, where or having clause. For example:
      * <pre>
-     *   qb.where("foo.name in ("
-     *            + qb.subQueryBuilder().select("bar.id")
-     *                                  .from("Bar bar")
-     *                                  .where("bar.name = :barName")
-     *                                  .setParameter("barName", barName)
-     *                                  .toHql()
-     *            + ")");
+     *   HqlSubQueryBuilder sb = qb.subQueryBuilder();
+     *   sb.select("bar.id")
+     *     .from("Bar bar")
+     *     .where("bar.name = :barName")
+     *     .setParameter("barName", barName);
+     *   qb.where("foo.id in " + sb.toWrappedHql());
      * </pre>
      *
      * The subquery does a <code>select...</code>
