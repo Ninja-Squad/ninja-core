@@ -9,11 +9,12 @@ buildscript {
 
 apply plugin : 'java'
 apply plugin : 'eclipse'
-apply plugin: 'checkstyle'
-apply plugin: 'pmd'
-apply plugin: 'findbugs'
-apply plugin: 'cobertura'
-apply plugin: 'maven'
+apply plugin : 'checkstyle'
+apply plugin : 'pmd'
+apply plugin : 'findbugs'
+apply plugin : 'cobertura'
+apply plugin : 'maven'
+apply plugin : 'signing'
 
 group = 'com.ninja-squad'
 sourceCompatibility = 1.6
@@ -22,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-build.dependsOn project.tasks.getByName("cobertura")
+build.dependsOn tasks.getByName("cobertura")
 
 dependencies {
     compile 'com.google.guava:guava:11.0.2'
@@ -44,6 +45,17 @@ configurations {
     runtime.transitive = false
     testRuntime.transitive = false
 }
+
+task checkJavaVersion << {
+    if (!JavaVersion.current().isJava6()) {
+        String message = "ERROR: Java 1.6 required but " + 
+                         JavaVersion.current() + 
+                         " found. Change your JAVA_HOME environment variable.";
+        throw new IllegalStateException(message);
+    }
+}
+
+compileJava.dependsOn checkJavaVersion
 
 [compileJava, compileTestJava]*.options*.encoding = 'ISO-8859-1'
 
@@ -83,7 +95,7 @@ findbugsMain {
 }
 
 def sharedManifest = manifest {
-    attributes(['Implementation-Title': 'ninja-core', 
+    attributes(['Implementation-Title': project.name, 
                 'Implementation-Version': project.version,
                 'Implementation-Vendor': 'ninja-squad.com'])
 }
@@ -92,6 +104,11 @@ jar {
     manifest { 
         from sharedManifest
     }
+}
+
+javadoc {
+    options.noTimestamp true
+    options.linkSource true
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -110,6 +127,24 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     }
 }
 
+task distributionZip(type: Zip, dependsOn: [javadoc, jar]) {
+    classifier = 'dist'
+    def rootDir = project.name + '-' + project.version;
+    into(rootDir) {
+        from jar.archivePath
+    }
+    into(rootDir + '/src') {
+        from sourceSets.main.java
+    }
+    into(rootDir + '/javadoc') {
+        from javadoc.destinationDir
+    }
+}
+
+assemble {
+    dependsOn distributionZip
+}
+
 artifacts {
     archives sourcesJar
     archives javadocJar
@@ -126,20 +161,69 @@ cleanEclipseJdt << {
     f.delete()
 }
 
+task checkSonatypeProperties << {
+    if (project.properties['sonatypeUsername'] == null || project.properties['sonatypePassword'] == null) {
+        throw new IllegalStateException("ERROR: you need to have sonatypeUsername and sonatypePassword properties" +
+                                        " defined in your HOME/.gradle/gradle.properties file to upload archives");
+    }
+}
+
 uploadArchives {
+    dependsOn checkSonatypeProperties
     repositories {
         mavenDeployer {
-            // TODO configure maven repos:
-            // repository(url: uri("pomRepo"))
-            // snapshotRepository(url: uri("snapshotRepo"))
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                authentication(userName: project.properties['sonatypeUsername'], password: project.properties['sonatypePassword'])
+            }
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                authentication(userName: project.properties['sonatypeUsername'], password: project.properties['sonatypePassword'])
+            }
         }
     }
 }
 
 [install.repositories.mavenInstaller, uploadArchives.repositories.mavenDeployer]*.pom*.whenConfigured {pom ->
-    pom.dependencies = pom.dependencies.findAll {it.scope != 'test'} // we don't care about test dependencies
-    pom.dependencies.findAll {dep -> dep.artifactId != 'guava'}*.optional = true // all compile dependencies are optional except guava
-    pom.dependencies*.scope = null // all dependencies are compile time dependencies, and there is no need to say it
+    // we don't care about test dependencies
+    pom.dependencies = pom.dependencies.findAll {it.scope != 'test'} 
+    // all compile dependencies are optional except guava
+    pom.dependencies.findAll {dep -> dep.artifactId != 'guava'}*.optional = true 
+    // all dependencies are compile time dependencies, and there is no need to say it
+    pom.dependencies*.scope = null 
+    pom.project {
+        name = 'ninja-core'
+        description = 'Core utilities from Ninja Squad'
+        url = 'http://ninja-core.ninja-squad.com/'
+        organization {
+            name = 'Ninja Squad'
+            url = 'http://ninja-squad.com'
+        }
+        licenses {
+            license {
+                name 'MIT License'
+                url 'http://ninja-core.ninja-squad.com/license.html'
+                distribution 'repo'
+            }
+        }
+        scm {
+            url = 'https://github.com/Ninja-Squad/ninja-core'
+            connection = 'scm:git:git://github.com/Ninja-Squad/ninja-core'
+            developerConnection = 'scm:git:git://github.com/Ninja-Squad/ninja-core'
+        }
+        developers {
+            developer {
+                id = 'jnizet'
+                name = 'Jean-Baptiste Nizet'
+                email = 'jb@ninja-squad.com'
+            }
+        }
+    }
+}
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
 }
 
 task wrapper(type: Wrapper) {
