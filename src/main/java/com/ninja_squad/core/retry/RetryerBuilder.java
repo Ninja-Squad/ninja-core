@@ -45,8 +45,8 @@ public final class RetryerBuilder<V> {
     }
 
     /**
-     * Sets the wait strategy used to decide . The default strategy
-     * is to not sleep at all between attempts.
+     * Sets the stop strategy used to decide when to stop retrying. The default strategy
+     * is to retry until the call succeeds, indefinitely.
      * @param stopStrategy the strategy used to sleep between failed attempts
      * @return <code>this</code>
      * @throws IllegalStateException if a stop strategy has already been set.
