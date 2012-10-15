@@ -51,7 +51,7 @@ import com.ninja_squad.core.i18n.EnumResources;
  *                                                   .withNullOption(Option&lt;Integer&gt;nullSpaceOption())
  *                                                   .orderByValue(Ordering.&lt;Integer&gt;natural().reverse())
  *                                                   .toList();
- *     List&lt;Option&lt;Season&gt;&gt; seasons = OptionsBuilder.forEnumClass(Season.class)
+ *     List&lt;Option&lt;Season&gt;&gt; seasons = OptionsBuilder.forEnumClass(Season.class, EnumResources.getInstance())
  *                                                  .orderByLabel()
  *                                                  .toList();
  * </pre>

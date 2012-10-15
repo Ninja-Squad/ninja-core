@@ -29,6 +29,7 @@ import java.io.Serializable;
 import javax.annotation.Nonnull;
 
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.ninja_squad.core.i18n.EnumResources;
@@ -77,13 +78,23 @@ public final class Option<V> implements Serializable {
     }
 
     /**
+     * Creates a new option from its value and the <code>toString</code> function to set its label
+     * @param value the value of the option
+     * @return the created option
+     * @see #forValue(Object, Function)
+     */
+    public static <V> Option<V> forValue(@Nonnull V value) {
+        return forValue(value, Functions.toStringFunction());
+    }
+
+    /**
      * Creates a new option from its value and a function
      * @param value the value of the option
      * @param valueToLabel the function  which is used to get the label corresponding to the value
      * @return the created option
      */
     public static <V> Option<V> forValue(@Nonnull V value,
-                                         @Nonnull final Function<? super V, String> valueToLabel) {
+                                         @Nonnull Function<? super V, String> valueToLabel) {
         Preconditions.checkNotNull(value, "value may not be null");
         Preconditions.checkNotNull(valueToLabel, "label may not be null");
         return Option.<V>valueToOptionFunction(valueToLabel).apply(value);

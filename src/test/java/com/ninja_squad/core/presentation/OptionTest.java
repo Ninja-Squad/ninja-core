@@ -45,6 +45,13 @@ public class OptionTest {
 
     @Test
     public void forValueWorksAsExpected() {
+        Option<Integer> o1 = Option.forValue(1);
+        assertEquals(1, o1.getValue().intValue());
+        assertEquals("1", o1.getLabel());
+    }
+
+    @Test
+    public void forValueWithFunctionWorksAsExpected() {
         Option<Integer> o1 = Option.forValue(1, Functions.toStringFunction());
         assertEquals(1, o1.getValue().intValue());
         assertEquals("1", o1.getLabel());
