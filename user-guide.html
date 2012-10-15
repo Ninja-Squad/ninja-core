@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ninja-core, from Ninja Squad - User guide</title>
+        <meta name="description" content="">
+        <meta name="author" content="Ninja Squad">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/prettify.css" rel="stylesheet">
+        <link href="css/main.css" rel="stylesheet">
+        <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+        <script type="text/javascript" src="js/ga.js"></script>
+    </head>
+    <body onload="prettyPrint()">
+        <div class="container">
+            <div class="navbar navbar-inverse">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <a class="brand" href="index.html">ninja-core</a>
+                        <div class="nav">
+                            <ul class="nav">
+                                <li class="active"><a href="user-guide.html">User Guide</a></li>
+                                <li><a href="apidoc.html">API documentation</a></li>
+                                <li><a href="download.html">Download</a></li>
+                                <li><a href="license.html">License</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="page-header">
+                <h1>User Guide</h1>
+            </div>
+            
+            <div class="well">
+                <ul class="nav nav-list">
+                    <li><a href="#dependencies">Dependencies</a></li>
+                    <li><a href="#base">Base</a></li>
+                    <li><a href="#exception">Exceptions</a></li>
+                    <li><a href="#i18n">Internationalization</a></li>
+                    <li><a href="#jdbc">JDBC</a></li>
+                    <li><a href="#jsp">JSP</a></li>
+                    <li>
+                        <ul class="nav nav-list">
+                            <li><a href="#enumResources-tag">&lt;ninja:enumResource&gt; tag</a></li>
+                            <li><a href="#el-functions">EL functions</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#persistence">Persistence</a></li>
+                    <li>
+                        <ul class="nav nav-list">
+                            <li><a href="#JpqlQueryBuilder">JpqlQueryBuilder</a></li>
+                            <li><a href="#HqlQueryBuilder">HqlQueryBuilder</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#presentation">Presentation</a></li>
+                    <li><a href="#retry">Retry</a></li>
+                    <li><a href="#time">Time</a></li>
+                </ul>
+            </div>
+            
+            <h2><a id="dependencies"></a>Dependencies</h2>
+            <p>
+                ninja-core only has one mandatory dependency, which is <a href="http://code.google.com/p/guava-libraries">Guava</a>. Guava is used in most
+                of the classes and packages of ninja-core, and it's so awesome anyway that you wouldn't want to avoid it.
+            </p>
+            <p>
+                ninja-core has additional dependencies, that are optional, because they're needed only by some classes or packages.
+                For example, the <code>JpqlQueryBuilder</code> class, which is used to build JPA queries, obviously has a dependency
+                on the JPA API. We don't want to force you excluding the JPA dependency if you don't use JPA, but use ninja-core
+                for its JDBC utility classes. So all the other dependencies are marked optional, and should be added explicitely
+                to your build if you use ninja-core classes that need them.
+            </p>
+            <p>
+                These optional dependencies, most of the time, are obvious: <code>HqlQueryBuilder</code> needs Hibernate for example.
+                <code>JodaClock</code> needs joda-time. When the needed dependencies aren't obvious, this user guide is where you'll 
+                find the needed dependencies.
+            </p>
+            <hr/>
+            
+            <h2><a id="base"></a>Base</h2>
+            <p>
+                The <code>base</code> contains classes that complement Guava's base package with classes and methods that could or should
+                be in Guava (in our humble opinion). Currently, it contains only one class, <code>Optionals</code>, which provides a Guava
+                <code>Function</code> allowing tranforming potentially null values into <code>Optional</code> instances. Refer to the API
+                documentation for more details.
+            </p>
+            
+            <h2><a id="exception"></a>Exceptions</h2>
+            <p>
+                The <code>exception</code> package contains general-purpose exceptions. It currently only contains one: 
+                <code>ShouldNeverHappenException</code>
+            </p>
+            <p>
+                How many time are you forced to catch an exception that you're sure it will never happen?
+                Or to implement a default case knowing it's impossible? Consider for example the following code examples:
+            </p>
+            <pre class="prettyprint">
+    private byte[] toByteArray(String s) throws UnsupportedEncodingException {
+        // utf-8 is guaranteed to be supported by the Java Language Specification
+        return s.getBytes("utf-8");
+    }
+    
+    private void alert(Status s) {
+        switch (s) {
+            case OK :
+                System.out.println("Everything is OK");
+                break;
+            case ERROR :
+                System.out.println("Beware: there was an error");
+                break;
+            default :
+                // should never happen: the above status are the only existing one. What to do here?
+                // what if an additional status is introduced in the future?
+        }
+    }</pre>
+            
+            <p>
+                To help with these kinds of situation, ninja-core provides the <code>ShouldNeverHappenException</code>,
+                which extends the standard <code>IllegalStateException</code>, but is more meaningful.
+                The above code could thus be rewritten as:
+            </p>
+            <pre class="prettyprint">
+    private byte[] toByteArray(String s) {
+        try {
+            return s.getBytes("utf-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            // utf-8 is guaranteed to be supported by the Java Language Specification
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+    
+    private void alert(Status s) {
+        switch (s) {
+            case OK :
+                System.out.println("Everything is OK");
+                break;
+            case ERROR :
+                System.out.println("Beware: there was an error");
+                break;
+            default :
+                throw new ShouldNeverHappenException("Unknown status : " + s);
+        }
+    }</pre>
+            
+            <h2><a id="i18n"></a>Internationalization</h2>
+            <p>
+                In case you don't already know, <em>i18n</em> stands for <em>internationalization</em>.
+            </p>
+            <p>
+                The standard Java API provides native support for internationalization, with the following main classes: 
+                <code>ResourceBundle</code> and <code>Locale</code>. They are, however, cumbersome to use due to the 
+                checked <code>MissingResourceException</code> that it forces to handle everywhere. Moreover, it doesn't 
+                provide any convention to associate messages with classes and enums. The i18n package or ninja-core 
+                handles these two problems.
+            </p>
+            <p>
+                First of all, ninja-core suggests using the following conventions:
+            </p>
+            <ul>
+                <li>messages associated to the class <code>com.foo.SomeClass</code> are defined in a resource bundle
+                    with the base name <code>com.foo.resources.SomeClass</code>.</li>
+                <li>The same goes for enums. In addition, for each instance of the enum <code>com.foo.SomeEnum</code>
+                    the default message key has the same name as the enum instance.</li>
+                <li>Additional message keys can be associated with each enum instance by suffixing the instance name
+                    by <code>.someSuffix</code>.</li>
+            </ul>
+            <p>
+                Assuming <code>SomeClass</code> uses the message key <em>message1</em>, and <code>SomeEnum</code> defines the 
+                instances <code>SomeEnum.BAR</code> and <code>SomeEnum.BAZ</code>, you would thus have define the following 
+                bundles:
+            </p>
+            <pre>
+com
+  |_ foo
+       |_ resources
+            |_ SomeClass.properties
+            |        message1=The default translation of message 1
+            |_ SomeEnum.properties
+                     BAR=default label for BAR
+                     BAZ=default label for BAZ
+                     BAR.longLabel=default long label for BAR
+                     BAZ.longLabel=default long label for BAZ</pre>
+            <p>
+                To support these conventions, the i18n package comes with two classes: <code>ClassResources</code> and <code>EnumResources</code>.
+                Getting the messages associated with the above keys would look like that (for the default locale):
+            </p>
+            
+            <pre class="prettyprint">
+    ClassResources someClassResources = ClassResources.forClass(SomeClass.class);
+    String message1 = someClassResources.getString("message1");
+    
+    String barLabel = EnumResources.getInstance().getString(SomeEnum.BAR);
+    String longBazLabel = EnumResources.getInstance().withSuffix("longLabel").getString(SomeEnum.BAZ);</pre>
+            
+            <p>
+                The <code>EnumResources</code> also provides a comparator that allows sorting enum instances according
+                to their respective label, which is often needed.
+            </p>
+            
+            <p>
+                In the above examples, you don't have to catch any exception. By default, if a bundle or message key
+                doesn't exist, the methods will throw an <code>IllegalStateException</code> wrapping the original
+                <code>MissingResourceException</code>. But this is customizable by passing a <code>MissingResourceStrategy</code>
+                when constructing the <code>ClassResources</code> or <code>EnumResources</code> instance.<br/>
+                Various strategies are defined in the <code>MissingResourceStrategies</code> class:
+            </p>
+            <ul>
+                <li>return <code>null</code>;</li>
+                <li>return <code>???theMessageKey???</code> as the JSTL does</li>
+                <li>return the message key itself</li>
+            </ul>
+            <p>
+                Of course, you can define your own strategy is none of the provided ones suits you.
+            </p>
+            <p>
+                Also, note that the above examples use the default locale to get the messages from the resource bundles.
+                You can of course get the messages for another locale using <code>ClassResources.forClass(SomeClass.class).withLocale(Locale.FRENCH)</code>
+                or <code>EnumResources.getInstance().withLocale(Locale.FRENCH)</code> for example. <code>withLocale()</code>, 
+                <code>withMissingResourceStrategy()</code> and <code>withSuffix()</code> all return a new, immutable copy
+                of the original ClassResources or EnumResources instance. Those instances are thus cacheable and thread-safe.
+            </p>
+            
+            <h2><a id="jdbc"></a>JDBC</h2>
+            <p>
+                The JDBC API allows persisting and retrieving primitive types, but strangely, it doesn't support 
+                persisting and retrieving their nullable wrapper type (except through the <code>setObject()</code> and 
+                <code>getObject()</code> methods). If you want to persist a potentially null 
+                <code>Integer</code> instance as an integer, you can't use the <code>setInt()</code> method. Instead,
+                you're supposed to do the following:
+            </p>
+            <pre class="prettyprint">
+    if (value != null) {
+        statement.setInt(parameterIndex, value);
+    }
+    else {
+        statement.setNull(parameterIndex, Types.INTEGER);
+    }</pre>
+            <p>
+                The same goes for result sets, where <code>getInt()</code> returns 0 if the value was in fact null. So you need 
+                to do the following:
+            </p>
+                    <pre class="prettyprint">
+    Integer result = resultSet.getInt(columnIndex);
+    if (resultSet.wasNull()) {
+        return null;
+    }
+    return result;</pre>
+            
+            <p>
+                Enums are not first class citizens either. Most of the time, persisting an enum consists in peristing its 
+                <code>name()</code> or its <code>ordinal()</code>, but there's no shortcut method in the JDBC API to
+                persist or retrieve enums directly.
+            </p>
+            <p>
+                The jdbc package of ninja-core solves these (admittedly minor) issues by providing the <code>PreparedStatements</code>
+                and <code>ResultSets</code> utility classes. These classes provide static methods to set and get nullable
+                primitive types and enums. If you prefer a more OO approach, they also allow wrapping a PreparedStatement or ResultSet
+                into a dynamic proxy providing additional methods. The above examples can thus be written like this:
+            </p>
+            <pre class="prettyprint">
+    PreparedStatements.setNullableInt(statement, parameterIndex, value);
+    // or
+    EnhancedPreparedStatement enhancedStatement = PreparedStatements.enhance(statement);
+    enhancedStatement.setNullableInt(parameterIndex, value);
+    
+    // ...
+    
+    Integer result = ResultSets.getNullableInt(resultSet, columnIndex);
+    // or
+    EnhancedResultSet enhancedResultSet = ResultSets.enhance(resultSet);
+    Integer result = enhancedResultSet.getNullableInt(columnIndex);
+            </pre>
+            
+            <h2><a id="jsp"></a>JSP</h2>
+            <p>
+                The <code>jsp</code> package provides often needed JSP EL functions and JSP tags that are not part
+                of the JSTL. It also allows internationalizing enum instances using the same conventions as the ones
+                described in <a href="#i18n">the i18n section</a>.<br/>
+                To use them, drop the ninja-core.jar file under <code>WEB-INF/lib</code> in your webapp, and add
+                the following directive in your JSP:
+            </p>
+            <pre class="prettyprint">
+&lt;%@ taglib prefix="ninja" uri="http://www.ninja-squad.com/jsp/ninja-core" %&gt;</pre>
+            <p>
+                The taglib provides the following functions and tags:
+            </p>
+            <h3><a href="enumResources-tag"></a>&lt;ninja:enumResource&gt; tag</h3>
+            <p>
+                Gets an internationalized label from an enum constant using <code>com.ninja_squad.core.i18n.EnumResources</code> 
+                and writes it (unescaped) to the page writer.<br.>
+                The locale is, by default, found where the JSTL </code>setLocale</code> tag stores it. If not found there, it's 
+                found in the request. To change the way the locale is resolved, use the 
+                <code>com.ninja_squad.core.jsp.Config.setLocaleResolver()</code> method.
+            <p>
+            <h4>Attributes</h4>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>enum</td>
+                        <td>yes</td>
+                        <td>the enum for which an internationalized label must be displayed</td>
+                    </tr>
+                    <tr>
+                        <td>suffix</td>
+                        <td>no</td>
+                        <td>the suffix to use to get the internationalized label</td>
+                    </tr>
+                    <tr>
+                        <td>var</td>
+                        <td>no</td>
+                        <td>The name of the attribute to set with the label instead of writing it to the JSP writer</td>
+                    </tr>
+                    <tr>
+                        <td>scope</td>
+                        <td>no</td>
+                        <td>The scope of the attribute to set with the label instead of writing it to the JSP writer</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3><a href="el-functions"></a>EL Functions</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Signature</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>String nlToBr(String)</code></td>
+                        <td>Transforms newlines into HTML line breaks, and XML-escapes each line.</td>
+                    </tr>
+                    <tr>
+                        <td><code>String escapeJs(String)</code></td>
+                        <td>Escapes the characters that must be escaped in a JavaScript String literal (tab, newline, quote, etc.).</td>
+                    </tr>
+                    <tr>
+                        <td><code>String upperFirst(String)</code></td>
+                        <td>Upper-cases the first letter. Can be useful to display dates, for example (which, in the French locale
+                            at least, are formatted as <em>lundi 10 mars</em> instead of the often desired <em>Lundi 10 mars</em>.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2><a id="persistence"></a>Persistence</h2>
+            <p>
+                This package contains utilities for JPA and Hibernate applications. The first of these utilities is the
+                <code>Identifiable</code> interface, and its accompanying <code>Identifiables</code> utility class.
+            </p>
+            <p>
+                Entities all have an ID but nothing in the spec requires them to have a common interface returning this ID. This
+                is very useful, though, because having them all implement a generic Identifiable interface allows 
+                using common functions, predicates and orderings that trasform entities into their IDs, check that an entity 
+                has a given ID, or sort entities by their ID. This is particularly helpful in unit tests, but is also often
+                needed in production code. For example, you might want to check that a query returns the entities identified
+                by 34, 67 and 87. Doing that is as simple as
+            </p>
+            <pre class="prettyprint">
+    assertTrue(Iterables.elementsEqual(Lists.newArrayList(24L, 67L, 87L),
+                                       Iterables.transform(queryResult, Identifiables.<Long>toId()));</pre>
+            <p>
+                Checking that a query result contains the entity with the ID 765 is as simple as
+            </p>
+            <pre class="prettyprint">
+    assertTrue(Iterables.any(queryResult, Identifiables.withId(765L)));</pre>
+            
+            <h3><a name="JpqlQueryBuilder"></a>JpqlQueryBuilder</h3>
+            <p>
+                When using JPA, you have two choices to create your queries: JPQL and the Criteria API.
+                JPQL is simple and readable, but isn't well suited for dynamically generated queries, involving
+                several optional search criteria. The Criteria API is well suited for such dynamically
+                generated queries, but the API is complex, hard to use, and leads to code that is hard to read and understand.
+                Moreover, the API is more limitating than JPQL, and doesn't allow all the queries that JPQL allows.
+            </p>
+            <p>
+                The JpqlQueryBuilder class is a simple builder allowing the creation of dynamic JPQL queries. It's not type-safe
+                as the Criteria API is, but is much simpler, and doesn't limit you in any way. Here's an example of its usage:
+            </p>
+            <pre class="prettyprint">
+    JpqlQueryBuilder qb = JpqlQueryBuilder.start();
+    qb.select("cat.id")
+      .select("cat.name")
+      .from("Cat cat")
+      .from("inner join cat.owner owner")
+      .where("owner.lastName = :lastName")
+      .setParameter("lastName", lastName); // mandatory search criterion
+    if (firstName != null) { // optional search criterion
+        qb.where("owner.firstName = :firstName")
+          .setParameter("firstName", firstName);
+    }
+    qb.orderBy("cat.name desc");
+    Query query = qb.createQuery(entityManager);</pre>
+            <p>
+                As you see, it's only a very thin wrapper around JPQL, which makes it very easy to learn, and
+                much more readable than the Criteria API. Refer to the API documentation for more information.
+            </p>
+            
+            <h3><a name="HqlQueryBuilder"></a>HqlQueryBuilder</h3>
+            <p>
+                If you're using the native Hibernate API and not JPA, <code>HqlQueryBuilder</code> offers the same 
+                functionality as <code>JpqlQueryBuilder</code>. The only difference are that parameters aren't set the same way,
+                and that the builder generates Hibernate queries instead of JPA queries.
+            </p>
+            
+            <h2>Presentation</h2>
+            <p>
+                Whether you're doing rich desktop applications or web applications, you almost always need to display
+                options in a dropdown. These options have a value, used to identify them, and a label,
+                displayed to the end user. The value could be an ID or any regular object. A common situation is to display 
+                enum values in dropdown. These enum values must be internationalized,
+                and the values must often be displayed in the alphabetical order of their label. 
+            </p>
+            <p>
+                The <code>Option</code> class represents such an option. Its accompanying <code>OptionsBuilder</code> class
+                helps in constructing a list of options for various scenarios. It of course reuses the conventions
+                and classes from the <a href="#i18n">i18n</a> package to do so, when internationalization is needed. And it 
+                also supports prepending a blank option before the list of regular options.
+            </p>
+            <p>
+                Here are common examples of constructing a list of options, and manipulating them:
+            </p>
+            <pre class="prettyprint">
+    // a list of options wrapping Client instances, ordered by their natural ordering, 
+    // displaying the toString() of the clients, and beginning with a null option:
+    List&lt;Option&lt;Client&gt;&gt; clientOptions = OptionsBuilder.forValues(clients, Functions.toStringFunction())
+                                                       .withNullOption(Option&lt;Client&gt;nullSpaceOption())
+                                                       .orderByValue()
+                                                       .toList();
+                                                           
+    // A list of options wrapping ErrorCode enum instances, displaying their internationalized label and ordered
+    // by this label:
+    List&lt;Option&lt;ErrorCode&gt;&gt; errorCodeOptions = OptionsBuilder.forEnumClass(ErrorCode.class, EnumResources.getInstance())
+                                                             .orderByLabel()
+                                                             .toList();
+                                                             
+    // Get the selected option from a Swing JComboBox:
+    Option&lt;Client&gt; selected = clientComboBox.getSelectedItem();
+    // Check that it's not the null option
+    if (selected.isNull()) {
+        // TODO display some error
+    }
+    else {
+        // getting its value
+        Client selectedClient = selected.getValue();
+    }
+    
+    // select the null option in the combo box
+    clientComboBox.setSelectedItem(Option.&lt;Client&gt;nullSpaceOption());
+    // select a client in the combo box. Options are equal if their value are equal, so the label doesn't matter here:
+    clientComboBox.setSelectedItem(Option&lt;Client&gt;.forValue(theClientToSelect));</pre>
+                                                                 
+            <p>
+                Please see the API documentation for various other possibilities, like supplying custom comparators,
+                or restricting to only some enum instances.
+            </p>
+            
+            <h2><a id="retry"></a>Retry</h2>
+            <p>
+                It's quite common to be forced to execute an operation several times until it succeeds, or until
+                you finally decide to stop: acquiring a connection to a remote system, or retrying a transaction when it fails
+                due to a lock, for example. <code>Retryer</code> does that for you, in an intuitive and configurable way.
+            </p>
+            <p>
+                A <code>Retryer</code> can be built and configured using a <code>RetryerBuilder</code>. Once the Retryer is built, 
+                it can't be changed anymore, and can thus be reused for several operations, even in multiple threads.
+            </p>
+            <p>
+                There are several aspects of a Retryer that can be configured:
+            </p>
+            <ul>
+                <li>When does it consider that an attempt has failed. This could be an exception, or an incorrect result, or both.
+                    This aspect is configured by calling the <code>retryIfXxx()</code> methods of the builder, passing the 
+                    desired predicates.
+                </li>
+                <li>How much time should it wait between attempts. This is configured by providing a <code>WaitStrategy</code>.
+                    Several implementations are provided by the class <code>WaitStrategies</code>.
+                </li>
+                <li>When should it stop retrying. It could be after a given number of attempts, or after a given time, or never.
+                    This is configured by providing a <code>StopStrategy</code>. Several implementations
+                    are provided by the class <code>StopStrategies</code>.
+                </li>
+            </ul>
+            <p>
+                What the Retryer must do at each attempt is passed to the Retryer as a standard <code>Callable</code> instance. The 
+                Retryer will thus call this callable, in the calling thread, until the call succeeds or the stop strategy 
+                decides to stop.
+            </p>
+            <p>
+                Here's an example showing how you would try to open a connection for at most 10 times, waiting 30 seconds between
+                each attempt. The Retryer would retry until there is no exception and the returned connection is not null:
+            </p>
+            <pre class="prettyprint">
+    // build the retryer
+    Retryer&lt;Connection&gt; retryer = RetryerBuilder.newBuilder()
+                                                .retryIfException()
+                                                .retryIfResult(Predicates&lt;Connection&gt;.isNull())
+                                                .withStopStrategy(StopStrategies.stopAfterAttempt(10))
+                                                .withWaitStrategy(WaitStrategies.fixedWait(30, TimeUnit.SECONDS))
+                                                .build();
+                                                
+    // create a Callable that tries to open a connection
+    Callable&lt;Connection&gt; task = new Callable&lt;Connection&gt;() {
+        @Override
+        public Connection call() throws ConnectionException
+            return openConnection();
+        }
+    }
+    
+    // ask the retryer to execute this task until it succeeds or decides to stop
+    try {
+        Connection connection = retryer.call(task);
+        // TODO do something with the connection
+    }
+    catch (ExecutionException e) {
+        // this should never happen in this case
+        throw new ShouldNeverHappenException(e);
+    }
+    catch (RetryException e) {
+        // this indicates that the retryer stopped without ever succeeding
+        // TODO handle this exception
+    }</pre>
+            
+            <h2><a id="time"></a>Time</h2>
+            <p>
+                The <code>time</code> package provides utilities to help make your time-sensitive code
+                easily testable. It has two classes (<code>Clock</code> and <code>Clocks</code>) to use with 
+                the JDK date-related classes (Date and Calendar), and two other similar classes (<code>JodaClock</code> 
+                and <code>JodaClocks</code>) to use with the popular joda-time library.
+            </p>
+            <p>
+                Suppose you have a DAO/Repository that you want to unit test (with <a href="http://dbsetup.ninja-squad.com">DbSetup</a>
+                for example), containing the following method: 
+            </p>
+            <pre class="prettyprint">
+List<Order> findTodayOrders();</pre>
+            <p>
+                The problem with that kind of tests is that it can't use a fixed test data set, since the moment you execute it
+                affects what it returns.</p>
+                To solve this kind of problem, we suggest to avoid using <code>System.currentTimeMillis()</code>, 
+                <code>new Date()</code> or <code>DateTime.now()</code> as the source of your current time, but instead use an injectable 
+                <code>Clock</code> (or <code>JodaClock</code>) instance.
+            </p>
+            <p>
+                In production, the Clock instance would be the one returned by <code>Clocks.realClock()</code>, and which simply 
+                delegates to </code>System.currentTimeMillis()</code>. In your unit tests, you would inject a fake clock, like
+                the one returned by <code>Clocks.stoppedAt(firstJanuary2012)</code>, which would always return the same fixed date.
+                See the API documentation for other Clock implementations.
+            </p>
+                
+            <hr/>
+            <footer>
+                <small>&copy; <a href="http://ninja-squad.com">Ninja Squad</a> 2012</small>
+            </footer>
+        </div>
+        
+        <script src="js/prettify.js"></script>
+    </body>
+</html>
