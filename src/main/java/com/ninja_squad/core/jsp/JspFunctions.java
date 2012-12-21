@@ -126,7 +126,7 @@ public final class JspFunctions {
      * @return the transformed string
      */
     public static String upperFirst(String input) {
-        if (input == null || input.length() == 0) {
+        if (input == null || input.isEmpty()) {
             return "";
         }
         return Character.toUpperCase(input.charAt(0)) + input.substring(1);

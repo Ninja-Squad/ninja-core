@@ -80,7 +80,7 @@ public class ClocksTest {
         testRunningClock(Clocks.startingIn(offset * 1000L, TimeUnit.MICROSECONDS), date.getTime());
     }
 
-    public void testRunningClock(Clock clock, long timeReference) throws InterruptedException {
+    private void testRunningClock(Clock clock, long timeReference) throws InterruptedException {
         long t0 = System.currentTimeMillis();
         assertTrue(clock.nowInMillis() - timeReference < 50L);
         assertTrue(clock.nowAsDate().getTime() - timeReference < 50L);

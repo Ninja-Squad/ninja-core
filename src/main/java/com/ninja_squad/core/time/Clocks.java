@@ -157,7 +157,7 @@ public final class Clocks {
         public long nowInMillis() {
             return System.currentTimeMillis() + offsetInMillis;
         }
-    };
+    }
 
     /**
      * The implementation of Clock which returns always the same current time.
@@ -175,5 +175,5 @@ public final class Clocks {
         public long nowInMillis() {
             return timeInMillis;
         }
-    };
+    }
 }

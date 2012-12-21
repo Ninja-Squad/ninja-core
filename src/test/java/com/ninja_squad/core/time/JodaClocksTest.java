@@ -77,7 +77,7 @@ public class JodaClocksTest {
         testRunningClock(JodaClocks.startingIn(new Duration(offset)), instant.getMillis());
     }
 
-    public void testRunningClock(JodaClock clock, long timeReference) throws InterruptedException {
+    private void testRunningClock(JodaClock clock, long timeReference) throws InterruptedException {
         long t0 = System.currentTimeMillis();
         assertTrue(clock.nowInMillis() - timeReference < 50L);
         assertTrue(clock.nowAsDateTime().getMillis() - timeReference < 50L);

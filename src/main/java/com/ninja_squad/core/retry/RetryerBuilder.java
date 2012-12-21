@@ -39,7 +39,7 @@ import com.google.common.base.Predicates;
 public final class RetryerBuilder<V> {
     private StopStrategy stopStrategy;
     private WaitStrategy waitStrategy;
-    private Predicate<Attempt<V>> rejectionPredicate = Predicates.<Attempt<V>>alwaysFalse();
+    private Predicate<Attempt<V>> rejectionPredicate = Predicates.alwaysFalse();
 
     private RetryerBuilder() {
     }
@@ -171,10 +171,7 @@ public final class RetryerBuilder<V> {
             justification = "This predicate is never called with a null argument")
         @Override
         public boolean apply(Attempt<V> attempt) {
-            if (!attempt.hasException()) {
-                return false;
-            }
-            return exceptionClass.isAssignableFrom(attempt.getExceptionCause().getClass());
+            return attempt.hasException() && exceptionClass.isAssignableFrom(attempt.getExceptionCause().getClass());
         }
     }
 
@@ -226,10 +223,7 @@ public final class RetryerBuilder<V> {
             value = "NP",
             justification = "This predicate is never called with a null argument")
         public boolean apply(Attempt<V> attempt) {
-            if (!attempt.hasException()) {
-                return false;
-            }
-            return delegate.apply(attempt.getExceptionCause());
+            return attempt.hasException() && delegate.apply(attempt.getExceptionCause());
         }
     }
 }

@@ -100,7 +100,6 @@ public final class ResourceBundles {
         String className = clazz.getName();
         String packageName = clazz.getPackage().getName();
         String binarySimpleName = className.substring(packageName.length());
-        String baseName = packageName + ".resources." + binarySimpleName;
-        return baseName;
+        return packageName + ".resources." + binarySimpleName;
     }
 }

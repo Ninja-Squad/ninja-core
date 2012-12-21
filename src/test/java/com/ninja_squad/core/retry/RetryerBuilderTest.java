@@ -56,7 +56,7 @@ public class RetryerBuilderTest {
 
     private Callable<Boolean> notNullAfter5Attempts() {
         return new Callable<Boolean>() {
-            int counter = 0;
+            int counter;
             @Override
             public Boolean call() throws Exception {
                 if (counter < 5) {
@@ -126,7 +126,7 @@ public class RetryerBuilderTest {
 
     private Callable<Boolean> noIllegalStateExceptionAfter5Attempts() {
         return new Callable<Boolean>() {
-            int counter = 0;
+            int counter;
             @Override
             public Boolean call() throws Exception {
                 if (counter < 5) {
@@ -140,7 +140,7 @@ public class RetryerBuilderTest {
 
     private Callable<Boolean> noIOExceptionAfter5Attempts() {
         return new Callable<Boolean>() {
-            int counter = 0;
+            int counter;
             @Override
             public Boolean call() throws IOException {
                 if (counter < 5) {
@@ -314,7 +314,7 @@ public class RetryerBuilderTest {
 
     private Callable<Boolean> notNullResultOrIOExceptionOrRuntimeExceptionAfter5Attempts() {
         return new Callable<Boolean>() {
-            int counter = 0;
+            int counter;
             @Override
             public Boolean call() throws IOException {
                 if (counter < 1) {

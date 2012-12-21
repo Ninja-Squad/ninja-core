@@ -91,10 +91,9 @@ public class EnumResourceTag extends SimpleTagSupport {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void doTag() throws JspException, IOException {
-        String label = "";
         if (enumConstant != null && !(enumConstant instanceof Enum<?>)) {
             throw new JspException("The given enum (" + enumConstant + ") is not an instance of enum");
         }
@@ -103,7 +102,7 @@ public class EnumResourceTag extends SimpleTagSupport {
                                                    .withLocale(resolveLocale())
                                                    .withSuffix(Strings.nullToEmpty(suffix))
                                                    .withMissingResourceStrategy(MissingResourceStrategies.JSTL);
-        label = enumResources.getString((Enum) enumConstant);
+        String label = enumResources.getString((Enum) enumConstant);
         if (var == null) {
             getJspContext().getOut().print(label);
         }

@@ -26,6 +26,7 @@ package com.ninja_squad.core.jsp;
 
 import java.util.Locale;
 
+import javax.annotation.Nonnull;
 import javax.servlet.jsp.PageContext;
 
 /**
@@ -42,6 +43,7 @@ public final class JstlLocaleResolver implements LocaleResolver {
     }
 
     @Override
+    @Nonnull
     public Locale resolveLocale(PageContext context) {
         Locale locale =
             (Locale) javax.servlet.jsp.jstl.core.Config.find(context,

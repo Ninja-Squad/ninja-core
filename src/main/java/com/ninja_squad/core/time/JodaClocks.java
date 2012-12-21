@@ -150,7 +150,7 @@ public final class JodaClocks {
         public long nowInMillis() {
             return System.currentTimeMillis() + offsetInMillis;
         }
-    };
+    }
 
     /**
      * The implementation of JodaClock which returns always the same current time.

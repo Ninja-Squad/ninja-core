@@ -97,7 +97,7 @@ public final class OptionsBuilder<V> {
      * @param options the options to sort and/or prepend with a null option
      * @return the created OptionsBuilder instance
      */
-    public static <V, T> OptionsBuilder<V> forOptions(@Nonnull Iterable<Option<V>> options) {
+    public static <V> OptionsBuilder<V> forOptions(@Nonnull Iterable<Option<V>> options) {
         Preconditions.checkNotNull(options, "options may not be null");
         return new OptionsBuilder<V>(Lists.newArrayList(options));
     }
@@ -168,6 +168,7 @@ public final class OptionsBuilder<V> {
     @SuppressWarnings("unchecked")
     public OptionsBuilder<V> orderByValue() {
         Preconditions.checkState(!orderSet, "order has already been set");
+        orderSet = true;
         Collections.sort(options, new ByValueComparator<V>((Comparator<? super V>) Ordering.natural()));
         return this;
     }
@@ -180,6 +181,7 @@ public final class OptionsBuilder<V> {
     public OptionsBuilder<V> orderByValue(@Nonnull Comparator<? super V> valueComparator) {
         Preconditions.checkNotNull(valueComparator, "comparator may not be null");
         Preconditions.checkState(!orderSet, "order has already been set");
+        orderSet = true;
         Collections.sort(options, new ByValueComparator<V>(valueComparator));
         return this;
     }
@@ -191,6 +193,7 @@ public final class OptionsBuilder<V> {
      */
     public OptionsBuilder<V> orderByLabel() {
         Preconditions.checkState(!orderSet, "order has already been set");
+        orderSet = true;
         Collections.sort(options, BY_LABEL_COMPARATOR);
         return this;
     }
