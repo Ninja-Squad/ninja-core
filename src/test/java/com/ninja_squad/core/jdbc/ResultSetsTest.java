@@ -24,13 +24,13 @@
 
 package com.ninja_squad.core.jdbc;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import org.junit.Test;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.junit.Test;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class ResultSetsTest {
     private enum TestEnum {
@@ -357,5 +357,12 @@ public class ResultSetsTest {
         when(mockResultSet.getInt("foo")).thenReturn(2);
 
         assertEquals(2, ResultSets.enhance(mockResultSet).getInt("foo"));
+    }
+
+    @Test
+    public void equalsReturnsTrueOnSameEnhancedStatement() {
+        ResultSet mockResultSet = mock(ResultSet.class);
+        EnhancedResultSet enhanced = ResultSets.enhance(mockResultSet);
+        assertTrue(enhanced.equals(enhanced));
     }
 }

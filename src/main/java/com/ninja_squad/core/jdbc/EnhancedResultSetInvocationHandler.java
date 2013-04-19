@@ -24,23 +24,23 @@
 
 package com.ninja_squad.core.jdbc;
 
-import java.lang.reflect.InvocationHandler;
+import com.google.common.collect.ImmutableMap;
+import com.ninja_squad.core.exception.ShouldNeverHappenException;
+import com.ninja_squad.core.proxy.AbstractInvocationHandler;
+
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
-import com.google.common.collect.ImmutableMap;
-import com.ninja_squad.core.exception.ShouldNeverHappenException;
-
 /**
  * The invocation handler used by {@link ResultSets#enhance(ResultSet)}.
  * @author JB Nizet
  */
-class EnhancedResultSetInvocationHandler implements InvocationHandler {
+class EnhancedResultSetInvocationHandler extends AbstractInvocationHandler {
+
     private static final Map<Method, Invoker> INVOKERS = buildInvokers();
 
     private final ResultSet delegate;
@@ -208,10 +208,10 @@ class EnhancedResultSetInvocationHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws SQLException,
-                                                                            IllegalArgumentException,
-                                                                            IllegalAccessException,
-                                                                            InvocationTargetException {
+    public Object doInvoke(Object proxy, Method method, Object[] args) throws SQLException,
+                                                                              IllegalArgumentException,
+                                                                              IllegalAccessException,
+                                                                              InvocationTargetException {
         Invoker invoker = INVOKERS.get(method);
         if (invoker != null) {
             return invoker.invoke(delegate, args);

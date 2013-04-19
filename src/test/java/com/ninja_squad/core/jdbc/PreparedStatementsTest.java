@@ -24,14 +24,14 @@
 
 package com.ninja_squad.core.jdbc;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import org.junit.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import org.junit.Test;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class PreparedStatementsTest {
     private enum TestEnum {
@@ -267,5 +267,12 @@ public class PreparedStatementsTest {
         PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
         PreparedStatements.enhance(mockPreparedStatement).setString(1, "foo");
         verify(mockPreparedStatement).setString(1, "foo");
+    }
+
+    @Test
+    public void equalsReturnsTrueOnSameEnhancedStatement() {
+        PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
+        EnhancedPreparedStatement enhanced = PreparedStatements.enhance(mockPreparedStatement);
+        assertTrue(enhanced.equals(enhanced));
     }
 }
